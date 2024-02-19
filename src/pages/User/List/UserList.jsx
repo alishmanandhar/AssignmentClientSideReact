@@ -10,6 +10,7 @@ import {
     InputGroup,
     InputLeftElement,
     Select,
+    Text,
   } from '@chakra-ui/react'
 import { useGetUserListApi } from "../api/useGetUserListApi";
 import { FiEdit3, FiPlusSquare, FiSearch } from "react-icons/fi";
@@ -24,11 +25,52 @@ const UserList = () => {
 
     const [search,setSearch] = useState("");
     const [sort, setSort] = useState("desc");
-    const {data, loading,refetch} = useGetUserListApi(20,search,sort);
+    const [pageNumber, setPageNumber] = useState(1);
+    const {data, loading,refetch} = useGetUserListApi(15,search,sort,pageNumber);
+    const [userData, setUserData] = useState([]);
+    const [prevScrollY, setPrevScrollY] = useState(0);
+    const [searchingMode, setSearchingMode] = useState(false);
 
     useEffect(()=>{
         refetch();
-    },[search, sort])
+    },[search, sort,pageNumber])
+
+    useEffect(()=>{
+        // If user is not searching append to the list
+        if(!searchingMode && data?.getUsers){
+            setUserData(prevData => [...prevData, ...data?.getUsers])
+            window.scrollTo(0, prevScrollY);
+        }
+        
+        // if user is searching then replace data
+        if(searchingMode && data?.getUsers){
+            setUserData(data?.getUsers)
+            window.scrollTo(0, prevScrollY);
+        }
+    },[data])
+
+    // pagination starts here
+    function handleScroll() {
+        // to keep track of last scroll y axis
+        setPrevScrollY(window.scrollY);
+
+        if (window.innerHeight + document.documentElement.scrollTop === document.documentElement.offsetHeight) {
+            // go to next page
+            setPageNumber(prevPage => prevPage + 1);
+            // user has left the searching mode and began going through the list
+            setSearchingMode(false);
+        }
+    }
+
+    useEffect(()=>{
+        const debouncedHandleScroll = debounce(handleScroll, 500)
+      
+        window.addEventListener('scroll', debouncedHandleScroll);
+      
+          return () => {
+            window.removeEventListener('scroll', debouncedHandleScroll);
+          }
+    },[])
 
     return (
         <>
@@ -41,11 +83,20 @@ const UserList = () => {
                         <InputLeftElement pointerEvents='none'>
                             <FiSearch />
                         </InputLeftElement>
-                        <Input type='text' placeholder='Username' onChange={(e)=>setSearch(e.target.value)} />
+                        <Input type='text' placeholder='Username' onChange={(e)=>{
+                            // defined set timeout to limit refetch
+                            const timeoutId = setTimeout(() => {
+                                setPageNumber(1); setSearchingMode(true); setSearch(e.target.value);
+                            }, 500); // Adjust delay time as needed
+                        
+                            return () => {
+                                clearTimeout(timeoutId);
+                            };
+                        }} />
                     </InputGroup>
 
                     {/* Sorting user data by created date */}
-                    <Select onChange={(e)=>setSort(e.target.value)} defaultValue={"desc"}>
+                    <Select onChange={(e)=>{ setPageNumber(1); setSearchingMode(true); setSort(e.target.value);}} defaultValue={"desc"}>
                         <option value='asc'>Ascending</option>
                         <option value='desc'>Decending</option>
                     </Select>
@@ -63,49 +114,59 @@ const UserList = () => {
             </Flex>
 
             <Divider/>
-
+            
             {/* Table component */}
-            <TableCompoenent header={USER_FIELDS} row={<UserListRow data={data} loading={loading} refetch={refetch} />} />
+            <TableCompoenent header={USER_FIELDS} row={<UserListRow data={userData} setUserData={setUserData} loading={loading} refetch={refetch} />} />
+            <Text textAlign={"center"}>
+                {
+                    data?.getUsers?.length  === 0 ? "Reached End" : ""
+                }
+            </Text>
+            
         </>
     )
 }
 
 // table list row
-const UserListRow = ({data, loading,refetch}) => {
+const UserListRow = ({data,setUserData, loading,refetch}) => {
 
     useEffect(()=>{
         refetch();
     },[])
 
-    // data is loading
-    if(loading) return (
-        <>
-            <Shimmer />
-            <Shimmer />
-            <Shimmer />
-        </>
-    )
-
     // map user data
     return (
-        data?.getUsers?.map((item)=>(
-            <Tr key={item.id}>    
-                <Td>{item.name}</Td> 
-                <Td>{item.age}</Td> 
-                <Td>{item.bio}</Td> 
-                <Td>{item.createdAt.split('T')[0]}</Td> 
-                <Td>
-                    {/* update and delete user account */}
-                    <Flex gap={2}>
-                        <Link to={`/edit-user/${item.id}`}>
-                            <FiEdit3 color="blue" />
-                        </Link>
-                        
-                        <DeleteUser username={item.name} id={item.id} refetch={refetch}/>
-                    </Flex>
-                </Td> 
-            </Tr>
-        ))
+        <>
+            {
+                data?.map((item)=>(
+                    <Tr key={item.id}>    
+                        <Td>{item.name}</Td> 
+                        <Td>{item.age}</Td> 
+                        <Td>{item.bio}</Td> 
+                        <Td>{item.createdAt.split('T')[0]}</Td> 
+                        <Td>
+                            {/* update and delete user account */}
+                            <Flex gap={2}>
+                                <Link to={`/edit-user/${item.id}`}>
+                                    <FiEdit3 color="blue" />
+                                </Link>
+                                
+                                <DeleteUser username={item.name} id={item.id} refetch={refetch} data={data} setUserData={setUserData}/>
+                            </Flex>
+                        </Td> 
+                    </Tr>
+                    
+                ))
+            }
+            {
+                loading &&
+                    <>
+                        <Shimmer />
+                        <Shimmer />
+                        <Shimmer />
+                    </>
+            }
+        </>
     )
 }
 
@@ -121,5 +182,16 @@ const Shimmer = () => {
         </Tr>
     )
 }
+
+// Debounce function
+function debounce(func, delay) {
+    let timeoutId;
+    return function(...args) {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        func.apply(this, args);
+      }, delay);
+    };
+  }
 
 export default UserList;

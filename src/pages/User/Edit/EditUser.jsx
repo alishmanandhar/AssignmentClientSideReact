@@ -11,7 +11,7 @@ const EditUser = () =>{
     const params = useParams();
 
     const {data, loading} = useGetUserByIDApi(params.id);
-    const {register, handleSubmit, onSubmit, res, loading:progress} = useEditUser();
+    const {register, handleSubmit, onSubmit, res, loading:progress, isValid, isDirty, errors} = useEditUser();
 
     return (
         <>
@@ -28,11 +28,11 @@ const EditUser = () =>{
                 {/* User Add Form starts here */}
                     <input type="hidden"{...register('id')} value={data.user.id}/>
                     {/* created global input for consistant input design or style */}
-                    <LeftSideLabelInput register={register} defaultValue={data.user.name} name="name" label={"Full Name"} placeholder={"John Doe"} inputType={"text"} required={true} />
-                    <LeftSideLabelInput register={register} defaultValue={data.user.age} name="age" label={"Age"} placeholder={"30"} inputType={"number"} required={true}/>
-                    <LeftSideLabelInput register={register} defaultValue={data.user.bio} name="bio" label={"Bio"} placeholder={"Something about yourself!"} inputType={"textarea"} />
-                    <LeftSideLabelInput register={register} defaultValue={data.user.createdAt} name="createdAt" label={"Created At"} inputType={"Date"} required={true}/>
-                    <Button w={'10rem'} type="submit" disabled={progress}>
+                    <LeftSideLabelInput errors={errors} minLength={8} register={register} defaultValue={data.user.name} name="name" label={"Full Name"} placeholder={"John Doe"} inputType={"text"} required={true} />
+                    <LeftSideLabelInput errors={errors} minLength={1} register={register} defaultValue={data.user.age} name="age" label={"Age"} placeholder={"30"} inputType={"number"} required={true}/>
+                    <LeftSideLabelInput errors={errors} register={register} defaultValue={data.user.bio} name="bio" label={"Bio"} placeholder={"Something about yourself!"} inputType={"textarea"} />
+                    <LeftSideLabelInput errors={errors} register={register} defaultValue={data.user.createdAt} name="createdAt" label={"Created At"} inputType={"Date"} required={true}/>
+                    <Button w={'10rem'} type="submit" isDisabled={ !isValid || !isDirty|| progress}>
                         Update
                         {
                             progress ? <Spinner /> :""

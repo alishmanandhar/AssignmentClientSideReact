@@ -1,10 +1,10 @@
 import {gql,useQuery} from '@apollo/client';
 
-export const useGetUserListApi = (number,name,sort) => {
+export const useGetUserListApi = (number,name,sort,pageNumber) => {
 
     const getUsers = gql`
-        query GetUsers($number: Int,$name: String, $sort: String ){
-            getUsers(number: $number, name: $name, sort: $sort) {
+        query GetUsers($pageNumber:Int, $number: Int,$name: String, $sort: String ){
+            getUsers(pageNumber:$pageNumber, number: $number, name: $name, sort: $sort) {
             id
             name
             age
@@ -17,7 +17,8 @@ export const useGetUserListApi = (number,name,sort) => {
         variables:{
           number: number,
           name:name,
-          sort:sort
+          sort:sort,
+          pageNumber:pageNumber
         }
       });
 

@@ -26,7 +26,7 @@ const TableCompoenent = ({header,row}) => {
                     {row}
                 </Tbody>
             </Table>
-            </TableContainer>
+        </TableContainer>
     )
 }
 

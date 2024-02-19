@@ -14,8 +14,10 @@ export function useEditUser() {
         handleSubmit,
         watch,
         reset,
-        formState: { isSubmitSuccessful,errors },
-      } = useForm();
+        formState: { isSubmitSuccessful,isValid,isDirty,errors }
+      } = useForm({ 
+        mode: "onChange",criteriaMode: "all"
+    });
 
     const { editUserToApi, loading, res,called } = useEditUserApi();
 
@@ -44,6 +46,9 @@ export function useEditUser() {
         handleSubmit,
         onSubmit,
         res,
-        loading
+        loading,
+        isValid,
+        isDirty,
+        errors
     }
 }

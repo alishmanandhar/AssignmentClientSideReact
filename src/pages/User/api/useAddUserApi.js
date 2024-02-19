@@ -1,4 +1,4 @@
-import {gql,useMutation,useQuery} from '@apollo/client';
+import {gql,useMutation} from '@apollo/client';
 
 export default function useAddUserApi(data){
 

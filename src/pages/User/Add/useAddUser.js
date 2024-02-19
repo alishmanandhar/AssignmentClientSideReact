@@ -2,20 +2,25 @@ import { useForm } from "react-hook-form"
 import useAddUserApi from "../api/useAddUserApi";
 import { useEffect } from "react";
 import { useToast } from '@chakra-ui/react'
+import { useNavigate } from "react-router-dom";
 
 // this is logic part for add user form
 // logic and ui has been separated
 export function useAddUser() {
 
     const toast = useToast();
+    const navigate = useNavigate();
 
     const {
         register,
         handleSubmit,
         watch,
         reset,
-        formState: { isSubmitSuccessful,errors },
-      } = useForm();
+        formState: { isSubmitSuccessful,isValid,isDirty,errors },
+      } = useForm({ 
+        defaultValues:{name:"",age:null,bio:""},
+        mode: "onChange",criteriaMode: "all"
+    });
 
     const { addUserToApi, loading, res,called } = useAddUserApi();
 
@@ -28,7 +33,7 @@ export function useAddUser() {
     }
 
     useEffect(()=>{
-        if(res && called) {
+        if(isSubmitSuccessful) {
             toast({
                 title: 'User created.',
                 description: "We've created user account.",
@@ -36,7 +41,10 @@ export function useAddUser() {
                 duration: 3000,
                 isClosable: true,
               });
+              
               reset();
+
+              navigate("/");
         }
     },[res])
 
@@ -45,6 +53,9 @@ export function useAddUser() {
         handleSubmit,
         onSubmit,
         res,
-        loading
+        loading,
+        isValid,
+        isDirty,
+        errors
     }
 }

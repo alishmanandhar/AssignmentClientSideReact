@@ -15,7 +15,7 @@ import { FiTrash } from 'react-icons/fi';
 import useDeleteUserApi from '../api/useDeleteUserApi';
 import { useEffect } from 'react';
 
-const DeleteUser = ({username,id,refetch}) => {
+const DeleteUser = ({username,id,refetch,setUserData,data}) => {
 
     const { isOpen, onOpen, onClose } = useDisclosure()
     const { deleteUserToApi, loading, res,called } = useDeleteUserApi();
@@ -32,7 +32,7 @@ const DeleteUser = ({username,id,refetch}) => {
               });
             
             onClose();
-            refetch();
+            setUserData(data.filter(item=>item.id != id))
 
         }
     },[res])
