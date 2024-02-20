@@ -57,12 +57,22 @@ const UserList = () => {
         }
     },[data])
 
+
+    // Define a variable for the percentage of page height to trigger pagination
+    const threshold = 0.9; // 90% of the page height
+
     // pagination starts here
     function handleScroll() {
         // to keep track of last scroll y axis
         setPrevScrollY(window.scrollY);
+        // Calculate the scroll position
+        const scrollPosition = window.innerHeight + window.pageYOffset;
+        
+        // Calculate the threshold position
+        const thresholdPosition = document.documentElement.offsetHeight * threshold;
+        
 
-        if (window.innerHeight + document.documentElement.scrollTop === document.documentElement.offsetHeight) {
+        if (scrollPosition >= thresholdPosition) {
             // go to next page
             setPageNumber(prevPage => prevPage + 1);
             // user has left the searching mode and began going through the list

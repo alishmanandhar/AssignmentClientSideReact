@@ -9,7 +9,6 @@ import {
     Text,
     Button,
     useDisclosure,
-    useToast,
   } from '@chakra-ui/react'
 import { FiTrash } from 'react-icons/fi';
 import useDeleteUserApi from '../api/useDeleteUserApi';
@@ -19,20 +18,11 @@ const DeleteUser = ({username,id,refetch,setUserData,data}) => {
 
     const { isOpen, onOpen, onClose } = useDisclosure()
     const { deleteUserToApi, loading, res,called } = useDeleteUserApi();
-    const toast = useToast();
 
     useEffect(()=>{
         if(res?.deleteUser){
-            toast({
-                title: 'Account Deleted.',
-                description: "We've deleted account!.",
-                status: 'warning',
-                duration: 3000,
-                isClosable: true,
-              });
-            
-            onClose();
             setUserData(data.filter(item=>item.id != id))
+            onClose();
 
         }
     },[res])

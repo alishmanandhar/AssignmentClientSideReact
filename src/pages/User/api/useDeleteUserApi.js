@@ -1,4 +1,4 @@
-import {gql,useMutation,useQuery} from '@apollo/client';
+import {gql,useMutation} from '@apollo/client';
 
 export default function useDeleteUserApi(){
 
@@ -16,7 +16,7 @@ export default function useDeleteUserApi(){
             });
             return data.createUser;
         } catch (error) {
-            console.error('Error deleting user:', error);
+            console.error('Error deleting user:');
             throw error;
         }
     };
