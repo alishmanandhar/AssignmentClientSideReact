@@ -30,10 +30,18 @@ const UserList = () => {
     const [userData, setUserData] = useState([]);
     const [prevScrollY, setPrevScrollY] = useState(0);
     const [searchingMode, setSearchingMode] = useState(false);
+    const [headerSort, setHeaderSort] = useState(USER_FIELDS);
 
     useEffect(()=>{
         refetch();
     },[search, sort,pageNumber])
+
+    useEffect(()=>{
+        const item = headerSort.find(item => item.label === 'Created At');
+        setPageNumber(1);
+        setSearchingMode(true);
+        setSort(item.sortType);
+    },[headerSort])
 
     useEffect(()=>{
         // If user is not searching append to the list
@@ -95,12 +103,6 @@ const UserList = () => {
                         }} />
                     </InputGroup>
 
-                    {/* Sorting user data by created date */}
-                    <Select onChange={(e)=>{ setPageNumber(1); setSearchingMode(true); setSort(e.target.value);}} defaultValue={"desc"}>
-                        <option value='asc'>Ascending</option>
-                        <option value='desc'>Decending</option>
-                    </Select>
-
                 </Flex>
 
                 {/* add user route */}
@@ -116,7 +118,7 @@ const UserList = () => {
             <Divider/>
             
             {/* Table component */}
-            <TableCompoenent header={USER_FIELDS} row={<UserListRow data={userData} setUserData={setUserData} loading={loading} refetch={refetch} />} />
+            <TableCompoenent headerSort={headerSort} setHeaderSort={setHeaderSort} row={<UserListRow data={userData} setUserData={setUserData} loading={loading} refetch={refetch} />} />
             <Text textAlign={"center"}>
                 {
                     data?.getUsers?.length  === 0 ? "Reached End" : ""
